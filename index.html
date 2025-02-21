@@ -24,6 +24,10 @@
     .controls {
       margin-top: 20px;
     }
+
+    .hidden {
+      display: none;
+    }
   </style>
   <!-- p5.jsライブラリを読み込み -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
@@ -34,7 +38,7 @@
 <body>
   <!-- スケッチ用のスクリプト -->
   <script>
-    let random_lang_list = ["Python", "Dockerそのまま\nデプロイできるやつ", "Next.js", "Elixir", "阿部寛のHPより\n早いHP作れるやつ", "Go", "Cursor", "GPT-o1Pro","ボタンひとつで\nデプロイできるやつ"];
+    let random_lang_list = ["Python", "Dockerそのまま\nデプロイできるやつ", "Next.js", "Elixir", "阿部寛のHPより\n早いHP作れるやつ", "Go", "Cursor", "GPT-o1Pro","ボタンひとつで\nデプロイできるやつ","OpenCV"];
     let random_lang = "";
     let img;
     let sound;
@@ -43,11 +47,14 @@
     let displayedLangs = new Set();
     let dragonVisible = false; // 初期状態でドラゴンは表示されない
     let dragonStartTime = 0;
+    let showThanks = false;
+    let qrImg;
 
     // 画像と音声をロード
     function preload() {
       img = loadImage('fantasy_dragon_white_flipped.png');
       sound = loadSound('fantasy_dragon_white_flipped.mp3');
+      qrImg = loadImage('qrcode_github.com.png');
     }
 
     function setup() {
@@ -62,6 +69,9 @@
         random_lang = availableLangs[Math.floor(Math.random() * availableLangs.length)];
         displayedLangs.add(random_lang);
         bottomText = ""; // クリック時に下のテキストを消す
+      } else if (displayedLangs.size >= random_lang_list.length) {
+        showThanks = true;
+        stopSound();
       }
     }
 
@@ -69,34 +79,52 @@
       // 背景を白に設定
       background(255);
 
-      // ドラゴンを表示
-      if (dragonVisible || random_lang !== "" || bottomText === "好きな技術を発表します") {
-        let base_offset = 300;
-        let ms = millis() - dragonStartTime;
-        let right_offset = ms <= 500 ? 2 * base_offset : (ms <= 1000 ? base_offset : 0);
-        image(img, width / 2 + right_offset, (height - width / 2) / 2 - 50, width / 2, width / 2);
+      if (showThanks) {
+        // "Thanks!!"を表示
+        textSize(60);
+        textStyle(BOLD);
+        fill(0);
+        textAlign(CENTER, CENTER);
+        text("Thanks!!", width / 2, height / 4);
+
+        // QRコードを表示
+        image(qrImg, width / 2 - 150, height / 2 - 100, 300, 300);
+
+        // リプレイボタンを表示
+        let replayButton = createButton('リプレイ');
+        replayButton.position(width / 2 - replayButton.width / 2, height - 100);
+        replayButton.mousePressed(() => location.reload());
+        replayButton.show();
+      } else {
+        // ドラゴンを表示
+        if (dragonVisible || random_lang !== "" || bottomText === "好きな技術を発表します") {
+          let base_offset = 300;
+          let ms = millis() - dragonStartTime;
+          let right_offset = ms <= 500 ? 2 * base_offset : (ms <= 1000 ? base_offset : 0);
+          image(img, width / 2 + right_offset, (height - width / 2) / 2 - 50, width / 2, width / 2);
+        }
+
+        // 吹き出しの線を表示
+        noFill();
+        strokeWeight(5);
+        rect(50, 50, 450, 300);
+        fill(0);
+        erase();
+        let dx = 5;
+        rect(50 + 450 - dx, 300 / 4, dx * 2, 300 / 4);
+        noErase();
+        line(50 + 450, 300 / 4, 600, 200);
+        line(50 + 450, 300 / 2, 600, 200);
+
+        // 吹き出しの中のテキストを表示
+        textSize(40);
+        textStyle(BOLD);
+        textAlign(CENTER, CENTER);
+        text(random_lang, 50 + 450 / 2, 50 + 300 / 2);
+
+        // 画面下にテキストを表示
+        text(bottomText, width / 2, height - 50);
       }
-
-      // 吹き出しの線を表示
-      noFill();
-      strokeWeight(5);
-      rect(50, 50, 450, 300);
-      fill(0);
-      erase();
-      let dx = 5;
-      rect(50 + 450 - dx, 300 / 4, dx * 2, 300 / 4);
-      noErase();
-      line(50 + 450, 300 / 4, 600, 200);
-      line(50 + 450, 300 / 2, 600, 200);
-
-      // 吹き出しの中のテキストを表示
-      textSize(40);
-      textStyle(BOLD);
-      textAlign(CENTER, CENTER);
-      text(random_lang, 50 + 450 / 2, 50 + 300 / 2);
-
-      // 画面下にテキストを表示
-      text(bottomText, width / 2, height - 50);
     }
 
     function playSound() {
