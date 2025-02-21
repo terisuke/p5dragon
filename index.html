@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>好きな技術発表ドラゴン</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+      flex-direction: column;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+  </style>
+  <!-- p5.jsライブラリを読み込み -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+  <!-- p5.sound.jsライブラリを読み込み -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>
+</head>
+
+<body>
+  <!-- スケッチ用のスクリプト -->
+  <script>
+    let random_lang_list = ["Python", "Dockerそのまま\nデプロイできるやつ", "Next.js", "Elixir", "阿部寛のHPより\n早いHP作れるやつ", "Go", "Cursor", "GPT-o1Pro","ボタンひとつで\nデプロイできるやつ"];
+    let random_lang = "";
+    let img;
+    let sound;
+    let playCount = 0;
+    let bottomText = "";
+    let displayedLangs = new Set();
+    let dragonVisible = false; // 初期状態でドラゴンは表示されない
+    let dragonStartTime = 0;
+
+    // 画像と音声をロード
+    function preload() {
+      img = loadImage('fantasy_dragon_white_flipped.png');
+      sound = loadSound('fantasy_dragon_white_flipped.mp3');
+    }
+
+    function setup() {
+      createCanvas(1280, 720);
+      random_lang = ""; // 初期言語は空白に設定
+    }
+
+    // canvas内をクリックしたときに言語を変更
+    function mousePressed() {
+      if (playCount > 1 && displayedLangs.size < random_lang_list.length) {
+        let availableLangs = random_lang_list.filter(lang => !displayedLangs.has(lang));
+        random_lang = availableLangs[Math.floor(Math.random() * availableLangs.length)];
+        displayedLangs.add(random_lang);
+        bottomText = ""; // クリック時に下のテキストを消す
+      }
+    }
+
+    function draw() {
+      // 背景を白に設定
+      background(255);
+
+      // ドラゴンを表示
+      if (dragonVisible || random_lang !== "" || bottomText === "好きな技術を発表します") {
+        let base_offset = 300;
+        let ms = millis() - dragonStartTime;
+        let right_offset = ms <= 500 ? 2 * base_offset : (ms <= 1000 ? base_offset : 0);
+        image(img, width / 2 + right_offset, (height - width / 2) / 2 - 50, width / 2, width / 2);
+      }
+
+      // 吹き出しの線を表示
+      noFill();
+      strokeWeight(5);
+      rect(50, 50, 450, 300);
+      fill(0);
+      erase();
+      let dx = 5;
+      rect(50 + 450 - dx, 300 / 4, dx * 2, 300 / 4);
+      noErase();
+      line(50 + 450, 300 / 4, 600, 200);
+      line(50 + 450, 300 / 2, 600, 200);
+
+      // 吹き出しの中のテキストを表示
+      textSize(40);
+      textStyle(BOLD);
+      textAlign(CENTER, CENTER);
+      text(random_lang, 50 + 450 / 2, 50 + 300 / 2);
+
+      // 画面下にテキストを表示
+      text(bottomText, width / 2, height - 50);
+    }
+
+    function playSound() {
+      if (!sound.isPlaying()) {
+        sound.loop();
+      }
+      playCount++;
+      if (playCount % 2 === 1) {
+        bottomText = "好きな技術発表ドラゴンが";
+        dragonVisible = true;
+        dragonStartTime = millis();
+      } else {
+        bottomText = "好きな技術を発表します";
+        dragonVisible = false; // ドラゴンのモーションを無効にする
+      }
+      random_lang = ""; // 吹き出しの中を空白にする
+    }
+
+    function stopSound() {
+      if (sound.isPlaying()) {
+        sound.stop();
+      }
+      random_lang = ""; // 停止時に吹き出しを空白にする
+      playCount = 0; // 再生回数をリセット
+      displayedLangs.clear(); // 表示された言語をリセット
+    }
+  </script>
+
+  <div class="controls">
+    <button onclick="playSound()">再生</button>
+    <button onclick="stopSound()">停止</button>
+  </div>
+</body>
+
+</html>
