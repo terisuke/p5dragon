@@ -56,6 +56,7 @@
     let showThanks = false;
     let qrImg;
     let adjustingVolume = false;
+    let showLoveMessage = false;
 
     // 画像と音声をロード
     function preload() {
@@ -83,7 +84,11 @@
           random_lang = availableLangs[Math.floor(Math.random() * availableLangs.length)];
           displayedLangs.add(random_lang);
           bottomText = ""; // クリック時に下のテキストを消す
-        } else if (displayedLangs.size >= random_lang_list.length) {
+        } else if (displayedLangs.size >= random_lang_list.length && !showLoveMessage) {
+          showLoveMessage = true;
+          random_lang = "";
+          bottomText = "好き　好き　大好き";
+        } else if (showLoveMessage) {
           showThanks = true;
           stopSound();
         }
@@ -112,7 +117,7 @@
         replayButton.show();
       } else {
         // ドラゴンを表示
-        if (dragonVisible || random_lang !== "" || bottomText === "好きな技術を発表します") {
+        if (dragonVisible || random_lang !== "" || bottomText === "好きな技術を発表します" || bottomText === "好き　好き　大好き") {
           let base_offset = 300;
           let ms = millis() - dragonStartTime;
           let right_offset = ms <= 500 ? 2 * base_offset : (ms <= 1000 ? base_offset : 0);
