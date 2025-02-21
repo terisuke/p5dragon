@@ -28,6 +28,12 @@
     .hidden {
       display: none;
     }
+
+    .volume-control {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
   </style>
   <!-- p5.jsライブラリを読み込み -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
@@ -49,6 +55,7 @@
     let dragonStartTime = 0;
     let showThanks = false;
     let qrImg;
+    let adjustingVolume = false;
 
     // 画像と音声をロード
     function preload() {
@@ -60,18 +67,26 @@
     function setup() {
       createCanvas(1280, 720);
       random_lang = ""; // 初期言語は空白に設定
+      let volumeSlider = createSlider(0, 1, 0.5, 0.01);
+      volumeSlider.position(windowWidth - 160, 10);
+      volumeSlider.style('width', '150px');
+      volumeSlider.input(() => adjustVolume(volumeSlider.value()));
+      volumeSlider.mousePressed(() => adjustingVolume = true);
+      volumeSlider.mouseReleased(() => adjustingVolume = false);
     }
 
     // canvas内をクリックしたときに言語を変更
     function mousePressed() {
-      if (playCount > 1 && displayedLangs.size < random_lang_list.length) {
-        let availableLangs = random_lang_list.filter(lang => !displayedLangs.has(lang));
-        random_lang = availableLangs[Math.floor(Math.random() * availableLangs.length)];
-        displayedLangs.add(random_lang);
-        bottomText = ""; // クリック時に下のテキストを消す
-      } else if (displayedLangs.size >= random_lang_list.length) {
-        showThanks = true;
-        stopSound();
+      if (!adjustingVolume) {
+        if (playCount > 1 && displayedLangs.size < random_lang_list.length) {
+          let availableLangs = random_lang_list.filter(lang => !displayedLangs.has(lang));
+          random_lang = availableLangs[Math.floor(Math.random() * availableLangs.length)];
+          displayedLangs.add(random_lang);
+          bottomText = ""; // クリック時に下のテキストを消す
+        } else if (displayedLangs.size >= random_lang_list.length) {
+          showThanks = true;
+          stopSound();
+        }
       }
     }
 
@@ -150,6 +165,10 @@
       random_lang = ""; // 停止時に吹き出しを空白にする
       playCount = 0; // 再生回数をリセット
       displayedLangs.clear(); // 表示された言語をリセット
+    }
+
+    function adjustVolume(value) {
+      sound.setVolume(value);
     }
   </script>
 
